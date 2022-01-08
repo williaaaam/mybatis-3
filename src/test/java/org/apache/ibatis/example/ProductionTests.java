@@ -15,12 +15,15 @@
  */
 package org.apache.ibatis.example;
 
+import org.apache.ibatis.domain.Production;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +35,8 @@ import java.io.InputStream;
  */
 public class ProductionTests {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProductionTests.class);
+
 
   @DisplayName("测试自定义ProductionMapper")
   @Test
@@ -40,7 +45,8 @@ public class ProductionTests {
     InputStream inputStream = Resources.getResourceAsStream(resource);
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
     SqlSession sqlSession = sqlSessionFactory.openSession();
-    Object selectOne = sqlSession.selectOne("org.mybatis.example.ProductionMapper.selectOne", 1L);
+    Production production = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.selectOne", 1L);
+    LOGGER.info(">>> production = {}", production);
   }
 
 

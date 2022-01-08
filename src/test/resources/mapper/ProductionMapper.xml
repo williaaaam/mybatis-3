@@ -21,7 +21,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="org.mybatis.example.ProductionMapper">
+<mapper namespace="org.apache.ibatis.example.ProductionMapper">
 
   <resultMap id="productionResultMap" type="org.apache.ibatis.domain.Production">
 
@@ -32,12 +32,9 @@
 
 
   <select id="selectOne" resultMap="productionResultMap">
-    SELECT
-           *
-    FROM
-            TB_PRODUCTION
-    WHERE
-            ID = #{id}
+    SELECT *
+    FROM tb_production
+    WHERE ID = #{id}
   </select>
 
 </mapper>
