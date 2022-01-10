@@ -18,6 +18,9 @@ package org.apache.ibatis.session;
 import java.sql.Connection;
 
 /**
+ * 每一个MyBatis的应用程序都以一个SqlSessionFactory对象的实例为核心。SqlSessionFactory是线程安全的
+ * <p>
+ * SqlSessionFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SqlSessionFactory 被视为一种bad smell。因此 　SqlSessionFactory 的最佳范围是应用范围。
  * Creates an {@link SqlSession} out of a connection or a DataSource
  *
  * @author Clinton Begin

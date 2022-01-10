@@ -26,6 +26,7 @@ import org.apache.ibatis.executor.ErrorContext;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 
 /**
+ * SqlSessionFactoryBuilder最佳实践是停留在方法级别，即方法局部变量
  * Builds {@link SqlSession} instances.
  *
  * @author Clinton Begin

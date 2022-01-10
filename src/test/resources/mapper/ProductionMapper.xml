@@ -27,6 +27,8 @@
 
     <id property="id" column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
     <result property="name" column="name" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    <result property="createTime" column="create_time" jdbcType="VARCHAR" javaType="java.lang.String"/>
+    <result property="updateTime" column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date"/>
 
   </resultMap>
 
@@ -35,6 +37,20 @@
     SELECT *
     FROM tb_production
     WHERE ID = #{id}
+  </select>
+
+  <!--resultType='int' int是类型别名，可用_int,Integer，java.lang.Integer代替-->
+  <select id="countUserWithNullableIsFalse" resultType="int">
+    SELECT
+           count(*)
+    FROM
+            tb_production
+    <where>
+      <foreach item="item" index="index" collection="list" nullable="false" open="id in ("
+               separator="," close=")">
+        #{item}
+      </foreach>
+    </where>
   </select>
 
 </mapper>

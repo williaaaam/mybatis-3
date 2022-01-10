@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * @author Williami
@@ -43,10 +44,25 @@ public class ProductionTests {
   public void testCustomProductionMapper() throws IOException {
     String resource = "mybatis-config.xml";
     InputStream inputStream = Resources.getResourceAsStream(resource);
+    // 查找数据源、解析执行SQL
     SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
-    SqlSession sqlSession = sqlSessionFactory.openSession();
-    Production production = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.selectOne", 1L);
-    LOGGER.info(">>> production = {}", production);
+    // 创建执行器
+    try (SqlSession sqlSession = sqlSessionFactory.openSession();) {
+      // 操作数据库
+      int  count = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.countUserWithNullableIsFalse", Arrays.asList(1,2));
+      //sqlSession.commit();
+
+      // 缓存
+      //Production production2 = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.selectOne", 1L);
+      //LOGGER.info(">>> production = {}", production);
+      //LOGGER.info(">>> production2 = {}", production2);
+
+      //
+      //ProductionMapper productionMapper = sqlSession.getMapper(ProductionMapper.class);
+      //LOGGER.info(">>> production3 = {}", productionMapper.selectPK());
+
+    }
+
   }
 
 

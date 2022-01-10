@@ -15,7 +15,12 @@
  */
 package org.apache.ibatis.example;
 
+import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.domain.Production;
+import org.apache.ibatis.submitted.manyanno.AnnoPost;
+import org.apache.ibatis.submitted.manyanno.AnnoPostTag;
+
+import java.util.List;
 
 /**
  * @author Williami
@@ -25,5 +30,32 @@ import org.apache.ibatis.domain.Production;
 public interface ProductionMapper {
 
   Production selectOne(Integer id);
+
+  @Select("select * from tb_production where id = 2")
+  Production selectPK();
+
+  @Select("select * from post where author_id = #{id} order by id")
+  @Results(value = {
+    @Result(property = "id", column = "id"),
+    @Result(property = "subject", column = "subject"),
+    @Result(property = "body", column = "body"),
+    @Result(property = "tags", javaType = List.class, column = "id", many = @Many(select = "getTagsForPost"))
+  })
+  List<AnnoPost> getPosts(int authorId);
+
+  @Select("select t.id, t.name from tag t inner join post_tag pt on pt.tag_id = t.id where pt.post_id = #{postId} order by id")
+  @ConstructorArgs(value = {
+    @Arg(column = "id", javaType = int.class),
+    @Arg(column = "name", javaType = String.class)
+  })
+  List<AnnoPostTag> getTagsForPost(int postId);
+
+  /**
+   * 如果没有注解@Param的话，集合默认可用参数是  collection/list
+   * @param productionList
+   * @return
+   */
+  int countUserWithNullableIsFalse(@Param("productionList") List<Integer> productionList);
+
 
 }

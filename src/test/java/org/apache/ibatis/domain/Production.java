@@ -1,5 +1,9 @@
 package org.apache.ibatis.domain;
 
+import com.sun.org.glassfish.gmbal.NameValue;
+import org.apache.ibatis.annotations.Property;
+import org.apache.ibatis.submitted.sqlprovider.BaseMapper;
+
 import java.util.Date;
 
 /**

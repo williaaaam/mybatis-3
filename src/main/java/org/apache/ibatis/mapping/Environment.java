@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import org.apache.ibatis.transaction.TransactionFactory;
 
 /**
+ * Enviroment包含了事务管理和连接池的配置
  * @author Clinton Begin
  */
 public final class Environment {

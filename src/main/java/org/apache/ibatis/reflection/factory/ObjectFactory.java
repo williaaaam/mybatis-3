@@ -34,6 +34,7 @@ public interface ObjectFactory {
   }
 
   /**
+   * 无参构造器
    * Creates a new object with default constructor.
    *
    * @param <T>
@@ -45,6 +46,7 @@ public interface ObjectFactory {
   <T> T create(Class<T> type);
 
   /**
+   * 有参构造器
    * Creates a new object with the specified constructor and params.
    *
    * @param <T>
