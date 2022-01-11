@@ -52,10 +52,10 @@ public interface ProductionMapper {
 
   /**
    * 如果没有注解@Param的话，集合默认可用参数是  collection/list
+   *
    * @param productionList
    * @return
    */
   int countUserWithNullableIsFalse(@Param("productionList") List<Integer> productionList);
-
 
 }

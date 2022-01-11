@@ -92,11 +92,13 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
+    // 查看该文件是否已经解析过
     if (parsed) {
       // 只允许解析一次
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
     }
     parsed = true;
+    // 解析Configuration节点
     parseConfiguration(parser.evalNode("/configuration"));
     return configuration;
   }
@@ -118,7 +120,8 @@ public class XMLConfigBuilder extends BaseBuilder {
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
       typeHandlerElement(root.evalNode("typeHandlers"));
-      // Mybatis加载Mappers的方式：四种， resource, url, class, package  优先级？
+      // 加载Mappers
+      // Mybatis加载Mappers的方式：四种， resource, url, class, package  优先级？package优先级最高
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -373,16 +376,23 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
+        // 1. 首先解析package节点
         if ("package".equals(child.getName())) {
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
+          // 如果不存在package节点，则开始解析 resource, url class 属性
+          // resource/url/mapperClass三个值只能有一个值是有值的
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
+
+          // 优先级: resource > url > mapperClass
           if (resource != null && url == null && mapperClass == null) { // resource
             ErrorContext.instance().resource(resource);
+            // 那么直接加载resource指向的XXXMapper.xml文件为字节流
             try(InputStream inputStream = Resources.getResourceAsStream(resource)) {
+              //通过XMLMapperBuilder解析XXXMapper.xml，可以看到这里构建的XMLMapperBuilde还传入了configuration,所以之后肯定是会将mapper封装到configuration对象中去的。
               XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
               mapperParser.parse();
             }
@@ -397,6 +407,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             // 使用注解方式写SQL语句时，会走到这里
             configuration.addMapper(mapperInterface);
           } else {
+            // 如果都不满足  则直接抛异常  如果配置了两个或三个  直接抛异常
             throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");
           }
         }

@@ -42,11 +42,14 @@ public class SqlSourceBuilder extends BaseBuilder {
 
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+    // 这里会生成一个GenericTokenParser，传入#{}作为开始和结束，然后调用其parse方法，即可将#{}换为 ?
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
     String sql;
     if (configuration.isShrinkWhitespacesInSql()) {
+      // 移除sql 空格 制表 回车 换行符，Token之间用' '符连接
       sql = parser.parse(removeExtraWhitespaces(originalSql));
     } else {
+      // 这里可以解析#{} 将其替换为?
       sql = parser.parse(originalSql);
     }
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
@@ -66,6 +69,9 @@ public class SqlSourceBuilder extends BaseBuilder {
     return builder.toString();
   }
 
+  /**
+   * SQL语句包括#{},那么handler就是ParameterMappingTokenHandler
+   */
   private static class ParameterMappingTokenHandler extends BaseBuilder implements TokenHandler {
 
     private final List<ParameterMapping> parameterMappings = new ArrayList<>();
@@ -84,6 +90,7 @@ public class SqlSourceBuilder extends BaseBuilder {
 
     @Override
     public String handleToken(String content) {
+      // 全局扫描#{id} 字符串之后  会把里面所有 #{} 调用handleToken 替换为?
       parameterMappings.add(buildParameterMapping(content));
       return "?";
     }

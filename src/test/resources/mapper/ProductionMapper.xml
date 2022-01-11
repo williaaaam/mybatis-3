@@ -23,8 +23,9 @@
 
 <mapper namespace="org.apache.ibatis.example.ProductionMapper">
 
-  <resultMap id="productionResultMap" type="org.apache.ibatis.domain.Production">
+  <cache type="org.apache.ibatis.cache.impl.PerpetualCache" eviction="LRU" size="10" flushInterval="600"></cache>
 
+  <resultMap id="productionResultMap" type="org.apache.ibatis.domain.Production">
     <id property="id" column="id" jdbcType="INTEGER" javaType="java.lang.Integer"/>
     <result property="name" column="name" jdbcType="VARCHAR" javaType="java.lang.String"/>
     <result property="createTime" column="create_time" jdbcType="VARCHAR" javaType="java.lang.String"/>
@@ -32,9 +33,13 @@
 
   </resultMap>
 
+  <sql id="base_column">
+    ID,NAME,CREATE_TIME,UPDATE_TIME
+  </sql>
 
-  <select id="selectOne" resultMap="productionResultMap">
-    SELECT *
+  <select id="selectOne" resultMap="productionResultMap" useCache="true">
+    SELECT
+    <include refid="base_column" />
     FROM tb_production
     WHERE ID = #{id}
   </select>

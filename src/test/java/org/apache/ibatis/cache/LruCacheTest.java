@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 
 class LruCacheTest {
 
+  /**
+   * 在MyBatis中的lruCache中，不活跃的节点是头节点，这个节点会被剔除掉，活跃节点放到尾部
+   */
   @Test
   void shouldRemoveLeastRecentlyUsedItemInBeyondFiveEntries() {
     LruCache cache = new LruCache(new PerpetualCache("default"));

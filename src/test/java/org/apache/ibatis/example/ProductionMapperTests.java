@@ -15,7 +15,6 @@
  */
 package org.apache.ibatis.example;
 
-import org.apache.ibatis.domain.Production;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -28,15 +27,16 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 /**
  * @author Williami
  * @description
  * @date 2022/1/8
  */
-public class ProductionTests {
+public class ProductionMapperTests{
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProductionTests.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ProductionMapperTests.class);
 
 
   @DisplayName("测试自定义ProductionMapper")
@@ -63,6 +63,28 @@ public class ProductionTests {
 
     }
 
+  }
+
+  @DisplayName("移除首尾 空格 制表符 回车符和换行符 \f\t\n\r")
+  @Test
+  public void testRemoveExtraWhitespaces(){
+    String sql = " select * from tb_production ";
+    System.out.println(removeExtraWhitespaces(sql));
+  }
+
+
+  public static String removeExtraWhitespaces(String original) {
+    StringTokenizer tokenizer = new StringTokenizer(original);
+    StringBuilder builder = new StringBuilder();
+    boolean hasMoreTokens = tokenizer.hasMoreTokens();
+    while (hasMoreTokens) {
+      builder.append(tokenizer.nextToken());
+      hasMoreTokens = tokenizer.hasMoreTokens();
+      if (hasMoreTokens) {
+        builder.append(' ');
+      }
+    }
+    return builder.toString();
   }
 
 

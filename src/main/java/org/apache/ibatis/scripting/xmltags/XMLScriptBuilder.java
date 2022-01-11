@@ -50,7 +50,9 @@ public class XMLScriptBuilder extends BaseBuilder {
     initNodeHandlerMap();
   }
 
-
+  /**
+   *
+   */
   private void initNodeHandlerMap() {
     nodeHandlerMap.put("trim", new TrimHandler());
     nodeHandlerMap.put("where", new WhereHandler());
@@ -64,11 +66,14 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public SqlSource parseScriptNode() {
+    // 解析动态标签
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
     if (isDynamic) {
+      // 如果是${}会直接不解析，等待执行的时候直接赋值
       sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
     } else {
+      // 用占位符方式来解析  #{} --> ?
       sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
     }
     return sqlSource;
@@ -76,19 +81,27 @@ public class XMLScriptBuilder extends BaseBuilder {
 
   protected MixedSqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
+    // 获取select标签下的子标签
     NodeList children = node.getNode().getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       XNode child = node.newXNode(children.item(i));
       if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+        // 如果是查询
+        // 获取原生SQL语句 这里是 select * from test where id = #{id}
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
+        // 检查sql是否是${}
         if (textSqlNode.isDynamic()) {
+          // 如果是${}那么直接不解析
           contents.add(textSqlNode);
           isDynamic = true;
         } else {
+          // 如果不是，则直接生成静态SQL
+          // #{} -> ?
           contents.add(new StaticTextSqlNode(data));
         }
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+        // 如果是增删改
         String nodeName = child.getNode().getNodeName();
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {

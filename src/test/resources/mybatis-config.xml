@@ -70,6 +70,7 @@
     <typeAlias alias="ProductionMapper" type="org.apache.ibatis.example.ProductionMapper"/>
   </typeAliases>
 
+  <!--与Spring整合后，将不再需要environments-->
   <environments default="development">
     <environment id="development">
       <transactionManager type="JDBC"/>

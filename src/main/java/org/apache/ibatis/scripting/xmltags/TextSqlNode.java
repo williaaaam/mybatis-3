@@ -23,6 +23,7 @@ import org.apache.ibatis.scripting.ScriptingException;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
+ * SQL中含有${}，那么handler就是BindingTokenParser实例
  * @author Clinton Begin
  */
 public class TextSqlNode implements SqlNode {
@@ -56,6 +57,9 @@ public class TextSqlNode implements SqlNode {
     return new GenericTokenParser("${", "}", handler);
   }
 
+  /**
+   *
+   */
   private static class BindingTokenParser implements TokenHandler {
 
     private DynamicContext context;
@@ -99,6 +103,11 @@ public class TextSqlNode implements SqlNode {
       return isDynamic;
     }
 
+    /**
+     * 当扫描到${}的时候调用此方法  其实就是不解析 在运行时候在替换成具体的值
+     * @param content
+     * @return
+     */
     @Override
     public String handleToken(String content) {
       this.isDynamic = true;
