@@ -36,6 +36,20 @@ public interface Executor {
 
   int update(MappedStatement ms, Object parameter) throws SQLException;
 
+  /**
+   * 首先MyBatis在查询时，不会直接查询数据库，而是会进行二级缓存的查询，由于二级缓存的作用域是namespace，也可以理解为一个mapper，
+   * 所以还会判断一下这个mapper是否开启了二级缓存，如果没有开启，则进入一级缓存继续查询。
+   * 如果一级缓存查到了，那么直接就返回结果了，如果一级缓存没有查到结果，那么最终会进入数据库进行查询。
+   * @param ms
+   * @param parameter
+   * @param rowBounds
+   * @param resultHandler
+   * @param cacheKey
+   * @param boundSql
+   * @param <E>
+   * @return
+   * @throws SQLException
+   */
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
 
   <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
@@ -58,6 +72,10 @@ public interface Executor {
 
   Transaction getTransaction();
 
+  /**
+   * 如果SqlSession调用了close()方法，会释放掉一级缓存PerpetualCache对象，一级缓存将不可用
+   * @param forceRollback
+   */
   void close(boolean forceRollback);
 
   boolean isClosed();

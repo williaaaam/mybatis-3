@@ -115,12 +115,14 @@ public class MapperAnnotationBuilder {
   public void parse() {
     String resource = type.toString();
     if (!configuration.isResourceLoaded(resource)) {
+      // 如果mybatis-config配置的是xml文件，这里不会再次解析，如果配置的是Mapper接口，则会完成xml映射文件的解析
+      // 解析xml映射文件
       loadXmlResource();
       configuration.addLoadedResource(resource);
       assistant.setCurrentNamespace(type.getName());
       parseCache();
       parseCacheRef();
-      for (Method method : type.getMethods()) {
+      for (Method method : type.getMethods()) {// 遍历Mapper中的方法
         if (!canHaveStatement(method)) {
           continue;
         }
@@ -129,8 +131,11 @@ public class MapperAnnotationBuilder {
           parseResultMap(method);
         }
         try {
+          // 解析Mapper接口中的所有方法，并将其存到Configuration属性中的mappedStatements，mappedStatements是StickMap,继承HashMap
+          // 重写了set,set，主要是为了处理重复key问题，key重复直接抛异常
           parseStatement(method);
         } catch (IncompleteElementException e) {
+          // 失败了存储到IncompleteMethod中
           configuration.addIncompleteMethod(new MethodResolver(this, method));
         }
       }
@@ -301,6 +306,7 @@ public class MapperAnnotationBuilder {
       final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass, languageDriver, method);
       final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
       final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options)x.getAnnotation()).orElse(null);
+      // 每个方法的全限定类名+方法名 作为 key 存入存入 Configuration 中的 mappedStatements 属性
       final String mappedStatementId = type.getName() + "." + method.getName();
 
       final KeyGenerator keyGenerator;

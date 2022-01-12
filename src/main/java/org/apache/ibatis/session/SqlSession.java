@@ -282,12 +282,14 @@ public interface SqlSession extends Closeable {
   List<BatchResult> flushStatements();
 
   /**
+   * 如果SqlSession调用了close()方法，会释放掉一级缓存PerpetualCache对象，一级缓存将不可用。
    * Closes the session.
    */
   @Override
   void close();
 
   /**
+   * 如果SqlSession调用了clearCache()，会清空PerpetualCache对象中的数据，但是该对象仍可使用。
    * Clears local session cache.
    */
   void clearCache();

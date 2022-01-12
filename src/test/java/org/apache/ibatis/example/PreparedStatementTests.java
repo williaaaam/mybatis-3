@@ -27,20 +27,36 @@ public class PreparedStatementTests {
   @DisplayName("预编译与SQL注入")
   @Test
   public void testPreparedStatement() throws IOException, SQLException {
-
-    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config.xml"));
+    // 解析mybatis全局配置文件
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config-with-datasource.xml"));
+    // 关闭自动提交
     SqlSession sqlSession = sqlSessionFactory.openSession();
     try (Connection connection = sqlSession.getConnection()) {
-      String sql = "delete from tb_production where id = ?";
+      String sql = "select * from tb_production where id = ?";
       // 将SQL语句提交给数据库进行预编译
       PreparedStatement preparedStatement = connection.prepareStatement(sql);
       preparedStatement.setString(1, "4");
-      int executeUpdate = preparedStatement.executeUpdate();
+      preparedStatement.executeQuery();
 
-      preparedStatement.setString(1, "3");
-      int executeUpdate2 = preparedStatement.executeUpdate();
-
+      //preparedStatement.setString(1, "3");
+      //int executeUpdate2 = preparedStatement.executeUpdate();
+      //sqlSession.commit();
     }
+
+
+    // 关闭自动提交
+    SqlSession sqlSession2 = sqlSessionFactory.openSession();
+    try (Connection connection = sqlSession2.getConnection()) {
+      String sql = "select * from tb_production where id = ?";
+      // 将SQL语句提交给数据库进行预编译
+      PreparedStatement preparedStatement = connection.prepareStatement(sql);
+      preparedStatement.setString(1, "4");
+      preparedStatement.executeQuery();
+
+      //preparedStatement.setString(1, "3");
+      //int executeUpdate2 = preparedStatement.executeUpdate();
+    }
+
 
   }
 

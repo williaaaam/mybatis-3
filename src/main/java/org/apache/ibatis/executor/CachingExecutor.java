@@ -33,6 +33,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.transaction.Transaction;
 
 /**
+ * 同时可使用一级缓存和二级缓存
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -92,20 +93,28 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+    // 二级缓存的Cache
     Cache cache = ms.getCache();
     if (cache != null) {
+      //如果Cache不为空则进入
+      //如果有需要的话，就刷新缓存（有些缓存是定时刷新的，需要用到这个）
       flushCacheIfRequired(ms);
+      // 如果这个statement用到了缓存（二级缓存的作用域是namespace，也可以理解为这里的ms）
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
         @SuppressWarnings("unchecked")
+        //先从缓存拿
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
+          // 如果缓存的数据等于空，那么查询数据库
           list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+          //查询完毕后将数据放入二级缓存
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
       }
     }
+    // 如果cache根本就不存在，那么直接查询一级缓存
     return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 

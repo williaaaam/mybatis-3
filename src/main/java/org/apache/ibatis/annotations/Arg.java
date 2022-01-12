@@ -60,18 +60,18 @@ public @interface Arg {
   Class<?> javaType() default void.class;
 
   /**
-   * Return the jdbc type for column that map to this argument.
-   *
-   * @return the jdbc type
-   */
-  JdbcType jdbcType() default JdbcType.UNDEFINED;
-
-  /**
    * Returns the {@link TypeHandler} type for retrieving a column value from result set.
    *
    * @return the {@link TypeHandler} type
    */
   Class<? extends TypeHandler> typeHandler() default UnknownTypeHandler.class;
+
+  /**
+   * Return the jdbc type for column that map to this argument.
+   *
+   * @return the jdbc type
+   */
+  JdbcType jdbcType() default JdbcType.UNDEFINED;
 
   /**
    * Return the statement id for retrieving a object that map to this argument.

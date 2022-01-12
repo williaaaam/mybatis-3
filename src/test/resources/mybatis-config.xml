@@ -24,8 +24,14 @@
   <properties resource="jdbc.properties"/>
 
   <settings>
-    <!--全局性地开启或关闭所有映射器配置文件中已配置的任何缓存，一级缓存-->
+    <!--MyBatis缓存设置的参数-->
+    <!--全局性地开启或关闭所有映射器配置文件中已配置的任何缓存，二级缓存-->
+    <!--CachingExecutor-->
+    <!--cacheEnabled参数仅仅是打开了全局缓存开关，但这并不意味着默认情况下MyBatis就会进行全局缓存。实际上，如果需要使用全局缓存，还必须在映射器中配置全局缓存实例。-->
     <setting name="cacheEnabled" value="true"/>
+    <!-- 有效值：SESSION|STATEMENT，默认值为SESSION，一级缓存 -->
+    <!--通过localCacheScope控制的缓存策略只能在同一个SqlSession内有效，并且只有当参数localCacheScope为SESSION时才会使用SESSION缓存-->
+    <setting name="localCacheScope" value="SESSION" />
     <!--延迟加载的全局开关。当开启时，所有关联对象都会延迟加载。 特定关联关系中可通过设置 fetchType 属性来覆盖该项的开关状态。-->
     <setting name="lazyLoadingEnabled" value="false"/>
     <!--开启时，任一方法的调用都会加载该对象的所有延迟加载属性。 否则，每个延迟加载属性会按需加载（参考 lazyLoadTriggerMethods)。-->

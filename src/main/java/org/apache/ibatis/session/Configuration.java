@@ -775,7 +775,7 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
-    // 一级缓存
+    // 二级缓存
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }
@@ -1110,15 +1110,17 @@ public class Configuration {
     @Override
     @SuppressWarnings("unchecked")
     public V put(String key, V value) {
-      if (containsKey(key)) {
+      if (containsKey(key)) { // 全限定名重复，直接抛异常
         throw new IllegalArgumentException(name + " already contains value for " + key
           + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
       }
       if (key.contains(".")) {
+        // 只有方法名
         final String shortKey = getShortName(key);
         if (super.get(shortKey) == null) {
           super.put(shortKey, value);
         } else {
+          // 如果重复了，存一个Ambiguity对象标记一下
           super.put(shortKey, (V) new Ambiguity(shortKey));
         }
       }
@@ -1132,6 +1134,7 @@ public class Configuration {
         throw new IllegalArgumentException(name + " does not contain value for " + key);
       }
       if (value instanceof Ambiguity) {
+        // 如果是Ambiguity对象，则表明shortName重复了，抛出异常
         throw new IllegalArgumentException(((Ambiguity) value).getSubject() + " is ambiguous in " + name
           + " (try using the full name including the namespace, or rename one of the entries)");
       }

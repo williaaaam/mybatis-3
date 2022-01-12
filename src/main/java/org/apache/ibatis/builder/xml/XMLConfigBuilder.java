@@ -92,7 +92,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public Configuration parse() {
-    // 查看该文件是否已经解析过
+    // 全局配置文件只允许解析一次
     if (parsed) {
       // 只允许解析一次
       throw new BuilderException("Each XMLConfigBuilder can only be used once.");
@@ -376,8 +376,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
       for (XNode child : parent.getChildren()) {
-        // 1. 首先解析package节点
-        if ("package".equals(child.getName())) {
+        if ("package".equals(child.getName())) { // 解析package配置方式
           String mapperPackage = child.getStringAttribute("name");
           configuration.addMappers(mapperPackage);
         } else {
@@ -386,7 +385,6 @@ public class XMLConfigBuilder extends BaseBuilder {
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
-
           // 优先级: resource > url > mapperClass
           if (resource != null && url == null && mapperClass == null) { // resource
             ErrorContext.instance().resource(resource);

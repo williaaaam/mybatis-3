@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.example;
 
+import org.apache.ibatis.domain.Production;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -34,7 +35,7 @@ import java.util.StringTokenizer;
  * @description
  * @date 2022/1/8
  */
-public class ProductionMapperTests{
+public class ProductionMapperTests {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductionMapperTests.class);
 
@@ -49,7 +50,7 @@ public class ProductionMapperTests{
     // 创建执行器
     try (SqlSession sqlSession = sqlSessionFactory.openSession();) {
       // 操作数据库
-      int  count = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.countUserWithNullableIsFalse", Arrays.asList(1,2));
+      int count = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.countUserWithNullableIsFalse", Arrays.asList(1, 2));
       //sqlSession.commit();
 
       // 缓存
@@ -65,9 +66,23 @@ public class ProductionMapperTests{
 
   }
 
+  @Test
+  public void testSelectOneByNameWithCustomTypeHandler() throws IOException {
+    String resource = "mybatis-config.xml";
+    InputStream inputStream = Resources.getResourceAsStream(resource);
+    // 查找数据源、解析执行SQL
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+    // 创建执行器
+    try (SqlSession sqlSession = sqlSessionFactory.openSession();) {
+      Production production = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.selectOneByName", "Apple");
+      System.out.println(production);
+    }
+
+  }
+
   @DisplayName("移除首尾 空格 制表符 回车符和换行符 \f\t\n\r")
   @Test
-  public void testRemoveExtraWhitespaces(){
+  public void testRemoveExtraWhitespaces() {
     String sql = " select * from tb_production ";
     System.out.println(removeExtraWhitespaces(sql));
   }
@@ -85,6 +100,26 @@ public class ProductionMapperTests{
       }
     }
     return builder.toString();
+  }
+
+
+  @Test
+  public void testSelectOneByIdAndNameWithCustomTypeHandler() throws IOException {
+    String resource = "mybatis-config.xml";
+    InputStream inputStream = Resources.getResourceAsStream(resource);
+    // 查找数据源、解析执行SQL
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+    // 创建执行器
+    try (SqlSession sqlSession = sqlSessionFactory.openSession();) {
+      // Mybatis将new Object[]{5, "Apple"}包装成集合，源码如下：
+      /**
+       *       ParamMap<Object> map = new ParamMap<>();
+       *       map.put("array", object);
+       */
+      Production production = sqlSession.selectOne("org.apache.ibatis.example.ProductionMapper.selectOneByIdAndName", new Object[]{5, "Apple"});
+      System.out.println(production);
+    }
+
   }
 
 

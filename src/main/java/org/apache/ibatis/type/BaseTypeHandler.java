@@ -62,6 +62,7 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
         throw new TypeException("JDBC requires that the JdbcType must be specified for all nullable parameters.");
       }
       try {
+        // 设置null参数
         ps.setNull(i, jdbcType.TYPE_CODE);
       } catch (SQLException e) {
         throw new TypeException("Error setting null for parameter #" + i + " with JdbcType " + jdbcType + " . "
@@ -70,6 +71,12 @@ public abstract class BaseTypeHandler<T> extends TypeReference<T> implements Typ
       }
     } else {
       try {
+        // 设置非null参数,子类类型转换器实现
+        // select user_id,user_name from lw_user where user_name=#{userName}
+        // Mybatis 中默认提供了常用数据类型的映射，所以我们在写sql的时候才可以省略参数映射关系
+        // 因此上面sql等同于
+        // select user_id,user_name from lw_user where user_name=#{userName,jdbcType=VARCHAR}
+        // select user_id,user_name from lw_user where user_name=#{userName,jdbcType=VARCHAR,typeHandler=org.apache.ibatis.type.IntegerTypeHandler}
         setNonNullParameter(ps, i, parameter, jdbcType);
       } catch (Exception e) {
         throw new TypeException("Error setting non null for parameter #" + i + " with JdbcType " + jdbcType + " . "

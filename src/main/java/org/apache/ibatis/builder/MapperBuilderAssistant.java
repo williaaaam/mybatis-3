@@ -129,10 +129,15 @@ public class MapperBuilderAssistant extends BaseBuilder {
       boolean blocking,
       Properties props) {
     Cache cache = new CacheBuilder(currentNamespace)
+      // 缓存实现类型
         .implementation(valueOrDefault(typeClass, PerpetualCache.class))
+      // 缓存装饰器
         .addDecorator(valueOrDefault(evictionClass, LruCache.class))
+      // 缓存刷新时间金额，如果没有配置，则只有在执行相应语句的情况下刷新缓存
         .clearInterval(flushInterval)
+      // 缓存保存的对象大小
         .size(size)
+      // 读/写或者只读缓存,读/写缓存涉及拷贝和反序列化，多线程可安全修改
         .readWrite(readWrite)
         .blocking(blocking)
         .properties(props)

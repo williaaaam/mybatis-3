@@ -58,4 +58,9 @@ public interface ProductionMapper {
    */
   int countUserWithNullableIsFalse(@Param("productionList") List<Integer> productionList);
 
+
+  Production selectOneByName(@Param("product_name") String productName);
+
+  Production selectOneByIdAndName(Integer id, String productName);
+
 }

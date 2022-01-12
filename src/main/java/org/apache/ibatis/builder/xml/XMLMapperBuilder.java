@@ -92,19 +92,43 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   public void parse() {
     // 如果文件没有解析过
-    if (!configuration.isResourceLoaded(resource)) {
-      // 解析mapper标签
+    // 这里resource就是xxxMapper.xml文件的全路径
+    if (!configuration.isResourceLoaded(resource)) { // 判断是否加载过
+      // 解析mapper标签下的9个顶层节点
+      // mapper (cache-ref | cache | resultMap* | parameterMap* | sql* | insert* | update* | delete* | select* )+
       configurationElement(parser.evalNode("/mapper"));
       // 标识文件已经解析过
-      configuration.addLoadedResource(resource);
+      configuration.addLoadedResource(resource); // 加载之后的资源全路径放在Set<String> loadedResources
       // 通过命名空间，加载绑定类型，绑定Mapper
-      bindMapperForNamespace();
+      bindMapperForNamespace(); // 注册Mapper
     }
 
     // 重新解析之前解析不了的节点
-    parsePendingResultMaps();
-    parsePendingCacheRefs();
-    parsePendingStatements();
+    /**
+     * configurationElement()方法在解析ResultMap时，因为ResultMap有extend属性，如果解析extend时，发现父类还没解析ResultMap,就会抛出IncompleteElementException异常，
+     * 并且被加入到Configuration的incompleteResultMap集合，这里就是去解析incompleteResultMaps内没有完成解析的ResultMap
+     *
+     * 例如
+     * <select id="demoselect" paramterType='java.lang.Integer' resultMap='demoResultMap'>
+     * </select>
+     * <resultMap id="demoResultMap" type="demo">
+     *     <id column property>
+     *     <result coulmn property>
+     * </resultMap>
+     * select节点是需要获取resultMap的，但是此时resultMap并没有被解析到，所以解析到<select>这个节点的时候是无法获取到resultMap的信息的。
+     */
+    parsePendingResultMaps(); // 解析暂未完成的resultMap
+    /**
+     * 和上面类似，cache-ref是引用其他映射文件缓存，所以也可能存在它所引用的映射文件还没完成解析时会被加入到Configuration中的incompleteCacheRefs属性
+     *
+     * 但你可能会想要在多个命名空间中共享相同的缓存配置和实例,<cache-ref namespace="com.someone.application.data.SomeMapper"/>
+     */
+    parsePendingCacheRefs(); // 解析未完成的cache-ref
+
+    /**
+     * select标签上面可以使用useCache,需要确保当前的映射文件缓存所属的映射文件已经被加载，如果没有被加载，则当前标签会被加入到Configuration的incompleteStatements属性
+     */
+    parsePendingStatements(); // 解析未完成的Statements(SQL语句)
   }
 
   public XNode getSqlFragment(String refid) {
@@ -158,6 +182,14 @@ public class XMLMapperBuilder extends BaseBuilder {
         statementParser.parseStatementNode();
       } catch (IncompleteElementException e) {
         // xml语句有问题时 存储到集合中 等解析完能解析的再重新解析
+        /**
+         * <select id="demoselect" paramterType='java.lang.Integer' resultMap='demoResultMap'>
+         * </select>
+         * <resultMap id="demoResultMap" type="demo">
+         *     <id column property>
+         *     <result coulmn property>
+         * </resultMap>
+         */
         configuration.addIncompleteStatement(statementParser);
       }
     }
@@ -172,6 +204,7 @@ public class XMLMapperBuilder extends BaseBuilder {
           iter.next().resolve();
           iter.remove();
         } catch (IncompleteElementException e) {
+          // 再次失败并不会继续加入IncompleteResumtMaps
           // ResultMap is still missing a resource...
         }
       }
@@ -445,7 +478,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     if (namespace != null) {
       Class<?> boundType = null;
       try {
-        boundType = Resources.classForName(namespace);
+        boundType = Resources.classForName(namespace); // 根据命名空间来获取对应的Mapper接口
       } catch (ClassNotFoundException e) {
         // ignore, bound type is not required
       }
@@ -453,8 +486,8 @@ public class XMLMapperBuilder extends BaseBuilder {
         // Spring may not know the real resource name so we set a flag
         // to prevent loading again this resource from the mapper interface
         // look at MapperAnnotationBuilder#loadXmlResource
-        configuration.addLoadedResource("namespace:" + namespace);
-        configuration.addMapper(boundType);
+        configuration.addLoadedResource("namespace:" + namespace); // 将namespace:xxx.Mapper放入Set集合
+        configuration.addMapper(boundType); // 根据命名空间然后生成动态代理的Mapper实例放入MapperRegistry对象的knownMappers属性
       }
     }
   }

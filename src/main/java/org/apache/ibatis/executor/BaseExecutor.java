@@ -45,6 +45,7 @@ import org.apache.ibatis.transaction.Transaction;
 import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
+ * 只可使用一级缓存
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
@@ -65,6 +66,7 @@ public abstract class BaseExecutor implements Executor {
   protected BaseExecutor(Configuration configuration, Transaction transaction) {
     this.transaction = transaction;
     this.deferredLoads = new ConcurrentLinkedQueue<>();
+    // 创建一级缓存，默认是开启且无法关闭的，一级缓存默认作用域是SESSION，只要SqlSession不关闭缓存就会一直存在
     this.localCache = new PerpetualCache("LocalCache");
     this.localOutputParameterCache = new PerpetualCache("LocalOutputParameterCache");
     this.closed = false;
@@ -134,6 +136,7 @@ public abstract class BaseExecutor implements Executor {
     // 例如将select id=#{id}，解析成 select id = ?
     // 改写SQL, 校验SQL语法正确性？
     BoundSql boundSql = ms.getBoundSql(parameter);
+    // 创建缓存Key
     CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
     return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
   }
@@ -163,15 +166,18 @@ public abstract class BaseExecutor implements Executor {
     }
     List<E> list;
     try {
+      // 查询栈+1
       queryStack++;
-      // 二级缓存
+      //一级缓存
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
+        //对于存储过程有输出资源的处理
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
         list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
       }
     } finally {
+      //查询栈-1
       queryStack--;
     }
     if (queryStack == 0) {
@@ -180,6 +186,7 @@ public abstract class BaseExecutor implements Executor {
       }
       // issue #601
       deferredLoads.clear();
+      // 如果参数localCacheScope值为STATEMENT，则每次查询之后都清空缓存
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
         clearLocalCache();
@@ -336,14 +343,19 @@ public abstract class BaseExecutor implements Executor {
 
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
+    // 先往一级缓存中添加占位符
     localCache.putObject(key, EXECUTION_PLACEHOLDER);
     try {
+      //调用doQuery方法查询数据库
       list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     } finally {
+      // 移除占位符
       localCache.removeObject(key);
     }
+    // 缓存结果集
     localCache.putObject(key, list);
     if (ms.getStatementType() == StatementType.CALLABLE) {
+      // 如果是存储过程，则需要处理输出参数
       localOutputParameterCache.putObject(key, parameter);
     }
     return list;
