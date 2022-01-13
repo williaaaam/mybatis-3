@@ -30,6 +30,7 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.SerialFilterChecker;
 
 /**
+ * 序列化功能，将值序列化后存到缓存中。该功能用于缓存返回一份实例的Copy，用于保存线程安全
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {

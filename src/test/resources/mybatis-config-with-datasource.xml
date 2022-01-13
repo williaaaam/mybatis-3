@@ -40,4 +40,8 @@
     </environment>
   </environments>
 
+  <mappers>
+    <mapper resource="mapper/ProductionMapper-with-$.xml"/>
+  </mappers>
+
 </configuration>

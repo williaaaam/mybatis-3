@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.ibatis.cursor.Cursor;
 import org.apache.ibatis.executor.BatchResult;
+import org.apache.ibatis.mapping.MappedStatement;
 
 /**
  * SqlSession最大实践是request或method scope
@@ -192,6 +193,7 @@ public interface SqlSession extends Closeable {
   void select(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler);
 
   /**
+   * insert, delete, update 最终都会委托给{@link org.apache.ibatis.executor.BaseExecutor#update(MappedStatement, Object)}方法执行，执行前会先清空SqlSession对应的一级缓存LocalCache中的数据
    * Execute an insert statement.
    *
    * @param statement Unique identifier matching the statement to execute.

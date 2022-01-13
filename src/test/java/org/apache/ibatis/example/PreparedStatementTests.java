@@ -1,5 +1,6 @@
 package org.apache.ibatis.example;
 
+import org.apache.ibatis.domain.Production;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * @author Williami
@@ -57,6 +59,22 @@ public class PreparedStatementTests {
       //int executeUpdate2 = preparedStatement.executeUpdate();
     }
 
+
+  }
+
+
+  @Test
+  public void testWith$() throws IOException, SQLException {
+    // 解析mybatis全局配置文件
+    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream("mybatis-config-with-datasource.xml"));
+    // 关闭自动提交
+    try (SqlSession sqlSession = sqlSessionFactory.openSession();) {
+      Production production = new Production();
+      production.setId(15);
+      production.setName("'XuGeTang'");
+      // 执行SQL时进行变量替换
+      sqlSession.update("org.apache.ibatis.example.ProductionMapperV2.update", production);
+    }
 
   }
 

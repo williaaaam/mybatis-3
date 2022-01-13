@@ -21,7 +21,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
-<mapper namespace="org.apache.ibatis.example.ProductionMapper">
+<mapper namespace="org.apache.ibatis.example.ProductionMapperV2">
   <!--这个更高级的配置创建了一个 FIFO 缓存，每隔 60 秒刷新，最多可以存储结果对象或列表的 512 个引用，而且返回的对象被认为是只读的，因此对它们进行修改可能会在不同线程中的调用者产生冲突。
   可用的清除策略eviction有：
 
@@ -50,66 +50,22 @@
   </resultMap>
 
   <sql id="base_column">
-    ID,NAME,CREATE_TIME,UPDATE_TIME
+    ID
+    ,NAME,CREATE_TIME,UPDATE_TIME
   </sql>
 
   <select id="selectOne" resultMap="productionResultMap" useCache="true">
     SELECT
-    <include refid="base_column" />
+    <include refid="base_column"/>
     FROM tb_production
     WHERE ID = #{id}
   </select>
 
-  <select id="selectOneByName" resultMap="productionResultMap">
-    SELECT
-    <include refid="base_column" />
-    FROM
-         tb_production
-    WHERE
-          name = #{product_name,jdbcType=VARCHAR,typeHandler=org.apache.ibatis.example.typehandler.OhMyStringTypeHandler}
-    limit 1
-  </select>
-
-  <select id="selectOneByIdAndName" resultMap="productionResultMap">
-    SELECT
-    <include refid="base_column" />
-    FROM
-    tb_production
-    WHERE
-        id = #{array[0]}
-    AND
-        name = #{array[1]}
-    limit 1
-  </select>
-
-  <!--resultType='int' int是类型别名，可用_int,Integer，java.lang.Integer代替-->
-  <select id="countUserWithNullableIsFalse" resultType="int">
-    SELECT
-           count(*)
-    FROM
-            tb_production
-    <where>
-      <foreach item="item" index="index" collection="list" nullable="false" open="id in ("
-               separator="," close=")">
-        #{item}
-      </foreach>
-    </where>
-  </select>
-
-
-  <insert id="insert" parameterType="org.apache.ibatis.domain.Production">
-    insert into
-            tb_production (name,create_time,update_time)
-            values (#{name,jdbcType=VARCHAR},now(),now())
-  </insert>
-
-  <update id="update" parameterType="org.apache.ibatis.domain.Production">
+  <update id="update" parameterType="org.apache.ibatis.domain.Production" statementType="STATEMENT">
     UPDATE
-        tb_production
-    SET
-        name = #{name}
-    WHERE
-          id = #{id}
+      tb_production
+    SET name = ${name}
+    WHERE id = ${id}
   </update>
 
 </mapper>

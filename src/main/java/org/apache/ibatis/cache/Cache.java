@@ -18,6 +18,13 @@ package org.apache.ibatis.cache;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
+ *
+ * 二级缓存有可能存在脏读的问题（可避免）
+ * 由于二级缓存的作用域为namespace，那么就可以假设这么一个场景，有两个namespace操作一张表，第一个namespace查询该表并回写到内存中，
+ * 第二个namespace往表中插一条数据，那么第一个namespace的二级缓存是不会清空这个缓存的内容的，在下一次查询中，还会通过缓存去查询，这样会造成数据的不一致。
+ *
+ * 所以当项目里有多个命名空间操作同一张表的时候，最好不要用二级缓存，或者使用二级缓存时避免用两个namespace操作一张表。
+ *
  * SPI for cache providers.
  * <p>
  * One instance of cache will be created for each namespace.

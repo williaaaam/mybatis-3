@@ -86,6 +86,15 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);
+    // 1054267432:3446121107:org.apache.ibatis.example.ProductionMapper.selectOneByName:0:2147483647:SELECT
+    //
+    //    ID,NAME,CREATE_TIME,UPDATE_TIME
+    //
+    //    FROM
+    //         tb_production
+    //    WHERE
+    //          name = ?
+    //    limit 1:Apple:development
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
@@ -94,10 +103,12 @@ public class CachingExecutor implements Executor {
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
     // 二级缓存的Cache
+    // 例如cache实例: SynchronizedCache > LoggingCache > ScheduledCache > LruCache > PerpetualCache > HashMap
     Cache cache = ms.getCache();
     if (cache != null) {
       //如果Cache不为空则进入
       //如果有需要的话，就刷新缓存（有些缓存是定时刷新的，需要用到这个）
+      // select默认使用二级缓存，并且不需要刷新缓存
       flushCacheIfRequired(ms);
       // 如果这个statement用到了缓存（二级缓存的作用域是namespace，也可以理解为这里的ms）
       if (ms.isUseCache() && resultHandler == null) {

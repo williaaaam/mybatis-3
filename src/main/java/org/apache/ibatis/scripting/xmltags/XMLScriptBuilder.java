@@ -90,7 +90,7 @@ public class XMLScriptBuilder extends BaseBuilder {
         // 获取原生SQL语句 这里是 select * from test where id = #{id}
         String data = child.getStringBody("");
         TextSqlNode textSqlNode = new TextSqlNode(data);
-        // 检查sql是否是${}
+        // 检查sql包含是${}
         if (textSqlNode.isDynamic()) {
           // 如果是${}那么直接不解析
           contents.add(textSqlNode);

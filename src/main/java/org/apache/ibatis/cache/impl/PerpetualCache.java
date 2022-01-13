@@ -22,6 +22,7 @@ import org.apache.ibatis.cache.Cache;
 import org.apache.ibatis.cache.CacheException;
 
 /**
+ * 作为为最基础的缓存类，底层实现比较简单，直接使用了HashMap
  * @author Clinton Begin
  */
 public class PerpetualCache implements Cache {

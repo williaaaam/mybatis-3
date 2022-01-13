@@ -111,7 +111,7 @@ public class Configuration {
   protected boolean multipleResultSetsEnabled = true;
   protected boolean useGeneratedKeys;
   protected boolean useColumnLabel = true;
-  // 一级缓存
+  // 二级缓存
   protected boolean cacheEnabled = true;
   protected boolean callSettersOnNulls;
   protected boolean useActualParamName = true;
@@ -1114,6 +1114,7 @@ public class Configuration {
         throw new IllegalArgumentException(name + " already contains value for " + key
           + (conflictMessageProducer == null ? "" : conflictMessageProducer.apply(super.get(key), value)));
       }
+      // selectOneByIdAndName->MappedStatement
       if (key.contains(".")) {
         // 只有方法名
         final String shortKey = getShortName(key);
@@ -1124,6 +1125,8 @@ public class Configuration {
           super.put(shortKey, (V) new Ambiguity(shortKey));
         }
       }
+
+      // 类全限定名+selectOneByIdAndName -> MappedStatement
       return super.put(key, value);
     }
 

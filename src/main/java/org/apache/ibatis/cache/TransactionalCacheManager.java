@@ -22,10 +22,12 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
 import org.apache.ibatis.util.MapUtil;
 
 /**
+ * 缓存事务的控制主要是通过TransactionalCacheManager控制TransactionCache完成的,关键就在于TransactionCache中的entriesToAddCommit和entriesMissedInCache这两个对象
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {
 
+ //TransactionalCacheManager中封装了一个Map，用于将事务缓存对象缓存起来，这个Map的Key是我们的二级缓存对象，而Value是一个叫做TransactionalCache，顾名思义，这个缓存就是事务缓存
   private final Map<Cache, TransactionalCache> transactionalCaches = new HashMap<>();
 
   public void clear(Cache cache) {

@@ -56,6 +56,7 @@ public abstract class BaseExecutor implements Executor {
   protected Executor wrapper;
 
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+  // 每个Executor有一个LocalCache
   protected PerpetualCache localCache;
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
@@ -168,7 +169,7 @@ public abstract class BaseExecutor implements Executor {
     try {
       // 查询栈+1
       queryStack++;
-      //一级缓存
+      // 一级缓存
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
         //对于存储过程有输出资源的处理
@@ -261,6 +262,7 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Cannot commit, transaction is already closed");
     }
+    // 如果没有调用close方法，则清空一级缓存中的数据
     clearLocalCache();
     flushStatements();
     if (required) {

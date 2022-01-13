@@ -63,4 +63,9 @@ public interface ProductionMapper {
 
   Production selectOneByIdAndName(Integer id, String productName);
 
+
+  int insert(Production production);
+
+  int update(Production production);
+
 }

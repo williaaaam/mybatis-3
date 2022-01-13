@@ -116,6 +116,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     // 当有 ${} 不解析
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
     //获取StatementType，可以理解为Statement和PreparedStatement, CallableStatement
+    // 标签如果没有配置statementType,默认是PreparedStatement
     StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
     // 结果集数量
     Integer fetchSize = context.getIntAttribute("fetchSize");

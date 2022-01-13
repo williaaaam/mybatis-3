@@ -22,6 +22,7 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * 最近最少使用
+ * 采用了Lru算法的Cache实现，移除最近最少使用的Key/Value
  * Lru (least recently used) cache decorator.
  *
  * @author Clinton Begin

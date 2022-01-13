@@ -89,7 +89,7 @@ public class SimpleExecutor extends BaseExecutor {
     Connection connection = getConnection(statementLog);
     // 初始化prepareStatement
     stmt = handler.prepare(connection, transaction.getTimeout());
-    // 获取了PrepareStatement之后，这里给#{}赋值// 参数化，纪行参数设置
+    // 获取了PrepareStatement之后，这里给#{}赋值// 参数化，进行参数设置
     handler.parameterize(stmt);
     return stmt;
   }
