@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * 解析xml中各个节点sql部分的Builder
  * @author Clinton Begin
  */
 public class XMLScriptBuilder extends BaseBuilder {
@@ -79,13 +80,50 @@ public class XMLScriptBuilder extends BaseBuilder {
     return sqlSource;
   }
 
+  /**
+   *
+   * @param node 一个Dom API中的Node接口的扩展类
+   * @return
+   */
   protected MixedSqlNode parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<>();
-    // 获取select标签下的子标签
+    /**
+     * <update id="update" parameterType="org.format.dynamicproxy.mybatis.bean.User">
+     *     UPDATE users
+     *     <trim prefix="SET" prefixOverrides=",">
+     *         <if test="name != null and name != ''">
+     *             name = #{name}
+     *         </if>
+     *         <if test="age != null and age != ''">
+     *             , age = #{age}
+     *         </if>
+     *         <if test="birthday != null and birthday != ''">
+     *             , birthday = #{birthday}
+     *         </if>
+     *     </trim>
+     *     where id = ${id}
+     * </update>
+     *
+     * 1 首先根据update节点(Node)得到所有的子节点，分别是3个子节点
+     *
+     * (1)文本节点 \n UPDATE users
+     *
+     * (2)trim子节点 …,包含 7个子节点，分别是文本节点、if节点、是文本节点、if节点、是文本节点、if节点、文本节点
+     *
+     * (3)文本节点 \n where id = #{id}
+     */
     NodeList children = node.getNode().getChildNodes();
     for (int i = 0; i < children.getLength(); i++) {
       XNode child = node.newXNode(children.item(i));
-      if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+      // 在使用mybatis 时我们sql是写在xml 映射文件中，如果写的sql中有一些特殊的字符的话，在解析xml文件的时候会被转义，但我们不希望他被转义，所以我们要使用<![CDATA[ ]]>来解决
+      // XML文件会在解析XML时将5种特殊字符进行转义，分别是&， <， >， “， ‘， 我们不希望语法被转义，就需要进行特别处理。解决办法：1. CDATA 2. 使用XML转义序列, 推荐使用CDATA简洁、清晰
+      //     特殊字符     转义序列
+      //    <           &lt;
+      //    >           &gt;
+      //    &           &amp;
+      //    "           &quot;
+      //    '           &apos;
+      if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) { // 文本节点或者CDATA
         // 如果是查询
         // 获取原生SQL语句 这里是 select * from test where id = #{id}
         String data = child.getStringBody("");
@@ -93,16 +131,17 @@ public class XMLScriptBuilder extends BaseBuilder {
         // 检查sql包含是${}
         if (textSqlNode.isDynamic()) {
           // 如果是${}那么直接不解析
-          contents.add(textSqlNode);
+          contents.add(textSqlNode); // 构造TextSqlNode
           isDynamic = true;
         } else {
           // 如果不是，则直接生成静态SQL
           // #{} -> ?
-          contents.add(new StaticTextSqlNode(data));
+          contents.add(new StaticTextSqlNode(data)); // 构造StaticTextSqlNode
         }
-      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+      } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628 元素节点, 如果节点是元素类型，例如<trim>则表示是动态SQL
         // 如果是增删改
         String nodeName = child.getNode().getNodeName();
+        // 例如获取TrimNodeHandler
         NodeHandler handler = nodeHandlerMap.get(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");

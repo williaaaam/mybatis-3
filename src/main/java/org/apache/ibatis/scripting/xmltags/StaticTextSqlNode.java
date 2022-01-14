@@ -16,6 +16,7 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 最简单的SqlNode，功能仅仅就是将自身记录的text拼接到context上下文中
  * @author Clinton Begin
  */
 public class StaticTextSqlNode implements SqlNode {

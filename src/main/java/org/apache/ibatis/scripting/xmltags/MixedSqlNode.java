@@ -21,6 +21,7 @@ import java.util.List;
  * @author Clinton Begin
  */
 public class MixedSqlNode implements SqlNode {
+  // 记录sql节点中的所有SQL片段
   private final List<SqlNode> contents;
 
   public MixedSqlNode(List<SqlNode> contents) {

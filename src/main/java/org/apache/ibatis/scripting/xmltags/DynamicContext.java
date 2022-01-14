@@ -66,6 +66,11 @@ public class DynamicContext {
     sqlBuilder.add(sql);
   }
 
+  /**
+   * 当SQL节点下的所有SqlNode完成解析后，可以通过DynamicContext.getSql()获取一条完整的SQL语句
+   *
+   * @return
+   */
   public String getSql() {
     return sqlBuilder.toString().trim();
   }

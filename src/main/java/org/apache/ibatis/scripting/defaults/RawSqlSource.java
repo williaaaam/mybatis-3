@@ -46,6 +46,12 @@ public class RawSqlSource implements SqlSource {
     sqlSource = sqlSourceParser.parse(sql, clazz, new HashMap<>());
   }
 
+  /**
+   * 通过遍历所有的SqlNode，获取sql
+   * @param configuration
+   * @param rootSqlNode
+   * @return
+   */
   private static String getSql(Configuration configuration, SqlNode rootSqlNode) {
     DynamicContext context = new DynamicContext(configuration, null);
     rootSqlNode.apply(context);

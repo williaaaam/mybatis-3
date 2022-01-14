@@ -16,8 +16,14 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 简单理解就是xml中每个标签，例如<update> <trim>等
  * @author Clinton Begin
  */
 public interface SqlNode {
+  /**
+   *
+   * @param context 将各Sql片段合并到DynamicContext中，拼接称为完整的SQL
+   * @return
+   */
   boolean apply(DynamicContext context);
 }

@@ -23,6 +23,7 @@ import org.apache.ibatis.scripting.ScriptingException;
 import org.apache.ibatis.type.SimpleTypeRegistry;
 
 /**
+ * 表示包含 “${}” 占位符的动态SQL节点
  * SQL中含有${}，那么handler就是BindingTokenParser实例
  * @author Clinton Begin
  */
