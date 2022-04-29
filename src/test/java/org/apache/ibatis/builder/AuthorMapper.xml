@@ -20,6 +20,9 @@
 
 <mapper namespace="org.apache.ibatis.domain.blog.mappers.AuthorMapper">
 
+	<!--声明启用二级缓存-->
+	<cache />
+
 	<parameterMap id="selectAuthor" type="org.apache.ibatis.domain.blog.Author">
 		<parameter property="id" />
 	</parameterMap>
@@ -93,6 +96,11 @@
 	<select id="selectAuthor" parameterMap="selectAuthor" resultMap="selectAuthor">
 		select id, username, password, email, bio, favourite_section
 		from author where id = ?
+	</select>
+
+	<select id="selectAuthorWithInlineParams2" parameterType="int" resultMap="selectAuthor">
+		select id, username, password, email, bio, favourite_section
+		from author where id = #{id}
 	</select>
 
 	<select id="selectImmutableAuthor" parameterMap="selectAuthor"

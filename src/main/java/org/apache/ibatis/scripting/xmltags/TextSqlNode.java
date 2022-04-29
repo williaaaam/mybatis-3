@@ -83,6 +83,7 @@ public class TextSqlNode implements SqlNode {
       //从缓存里取得值
       Object value = OgnlCache.getValue(content, context.getBindings());
       String srtValue = (value == null ? "" : String.valueOf(value)); // issue #274 return "" instead of "null"
+      // sql注入校验
       checkInjection(srtValue);
       return srtValue;
     }

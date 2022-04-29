@@ -131,6 +131,7 @@ public class DefaultSqlSession implements SqlSession {
       //根据statement id找到对应的MappedStatement
       MappedStatement ms = configuration.getMappedStatement(statement);
       //转而用执行器来查询结果,注意这里传入的ResultHandler是null
+      // 如果没有开启二级缓存，则先走到BaseExecutor#query中
       return executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);
@@ -262,9 +263,9 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public void close() {
     try {
-      //转而用执行器来close
+      // 转而用执行器来close
       executor.close(isCommitOrRollbackRequired(false));
-      //每次close之后，dirty标志设为false
+      // 每次close之后，dirty标志设为false
       dirty = false;
     } finally {
       ErrorContext.instance().reset();

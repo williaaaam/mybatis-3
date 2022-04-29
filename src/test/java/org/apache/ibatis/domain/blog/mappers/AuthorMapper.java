@@ -22,37 +22,40 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.domain.blog.Author;
 import org.apache.ibatis.session.ResultHandler;
 
 public interface AuthorMapper {
 
-  List<Author> selectAllAuthors();
+    List<Author> selectAllAuthors();
 
-  Set<Author> selectAllAuthorsSet();
-  
-  Vector<Author> selectAllAuthorsVector();
+    Set<Author> selectAllAuthorsSet();
 
-  LinkedList<Author> selectAllAuthorsLinkedList();
+    Vector<Author> selectAllAuthorsVector();
 
-  Author[] selectAllAuthorsArray();
+    LinkedList<Author> selectAllAuthorsLinkedList();
 
-  void selectAllAuthors(ResultHandler handler);
+    Author[] selectAllAuthorsArray();
 
-  Author selectAuthor(int id);
+    void selectAllAuthors(ResultHandler handler);
 
-  LinkedHashMap<String, Object> selectAuthorLinkedHashMap(int id);
-  
-  void selectAuthor(int id, ResultHandler handler);
+    Author selectAuthor(int id);
 
-  @Select("select")
-  void selectAuthor2(int id, ResultHandler handler);
-  
-  void insertAuthor(Author author);
+    List<Author> selectAuthorWithInlineParams2(@Param("id") int id);
 
-  int deleteAuthor(int id);
+    LinkedHashMap<String, Object> selectAuthorLinkedHashMap(int id);
 
-  int updateAuthor(Author author);
+    void selectAuthor(int id, ResultHandler handler);
+
+    @Select("select")
+    void selectAuthor2(int id, ResultHandler handler);
+
+    void insertAuthor(Author author);
+
+    int deleteAuthor(int id);
+
+    int updateAuthor(Author author);
 
 }

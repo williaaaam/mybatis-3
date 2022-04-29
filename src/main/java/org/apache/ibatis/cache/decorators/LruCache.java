@@ -104,7 +104,7 @@ public class LruCache implements Cache {
 
   private void cycleKeyList(Object key) {
     keyMap.put(key, key);
-    //keyMap是linkedhashmap，最老的记录已经被移除了，然后这里我们还需要移除被委托的那个cache的记录
+    //keyMap是LinkedHashMap，最老的记录已经被移除了，然后这里我们还需要移除被委托的那个cache的记录
     if (eldestKey != null) {
       delegate.removeObject(eldestKey);
       eldestKey = null;

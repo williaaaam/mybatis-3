@@ -121,7 +121,8 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
-    //先清局部缓存，再更新，如何更新交由子类，模板方法模式
+    // 先清局部缓存(一级缓存)，再更新，如何更新交由子类，模板方法模式
+    // 每次执行update前都会清空LocalCache
     clearLocalCache();
     return doUpdate(ms, parameter);
   }
@@ -169,6 +170,7 @@ public abstract class BaseExecutor implements Executor {
       //先根据cachekey从localCache去查
       list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
       if (list != null) {
+        // 主要处理存储过程的
         //若查到localCache缓存，处理localOutputParameterCache
         handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
       } else {
@@ -189,7 +191,7 @@ public abstract class BaseExecutor implements Executor {
       deferredLoads.clear();
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
-    	//如果是STATEMENT，清本地缓存
+    	//如果是STATEMENT，删除本地缓存
         clearLocalCache();
       }
     }
@@ -218,8 +220,11 @@ public abstract class BaseExecutor implements Executor {
     if (closed) {
       throw new ExecutorException("Executor was closed.");
     }
+    // 309419078:-88521622:org.apache.ibatis.domain.blog.mappers.AuthorMapper.selectAuthor:0:2147483647:select id, username, password, email, bio, favourite_section
+    // from author where id = ?:101:development
+    // statementId:全限定类名+方法名
     CacheKey cacheKey = new CacheKey();
-    //MyBatis 对于其 Key 的生成采取规则为：[mappedStementId + offset + limit + SQL + queryParams + environment]生成一个哈希码
+    //MyBatis 对于其 Key 的生成采取规则为：[mappedStatementId + offset + limit + SQL + queryParams + environment]生成一个哈希码
     cacheKey.update(ms.getId());
     cacheKey.update(Integer.valueOf(rowBounds.getOffset()));
     cacheKey.update(Integer.valueOf(rowBounds.getLimit()));
@@ -330,7 +335,7 @@ public abstract class BaseExecutor implements Executor {
     }
   }
 
-  //从数据库查
+  // 从数据库查
   private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
     List<E> list;
     //先向缓存中放入占位符？？？

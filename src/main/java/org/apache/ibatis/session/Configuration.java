@@ -107,12 +107,13 @@ public class Configuration {
   protected boolean multipleResultSetsEnabled = true;
   protected boolean useGeneratedKeys = false;
   protected boolean useColumnLabel = true;
-  //默认启用缓存
+  //默认启用二级缓存
   protected boolean cacheEnabled = true;
   protected boolean callSettersOnNulls = false;
   
   protected String logPrefix;
   protected Class <? extends Log> logImpl;
+  // 一级缓存默认级别session
   protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
   protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
   protected Set<String> lazyLoadTriggerMethods = new HashSet<String>(Arrays.asList(new String[] { "equals", "clone", "hashCode", "toString" }));
@@ -517,7 +518,8 @@ public class Configuration {
     } else {
       executor = new SimpleExecutor(this, transaction);
     }
-    //如果要求缓存，生成另一种CachingExecutor(默认就是有缓存),装饰者模式,所以默认都是返回CachingExecutor
+    // 如果要求缓存，生成另一种CachingExecutor(默认就是有缓存),装饰者模式,所以默认都是返回CachingExecutor
+    // 如果开启了二级缓存，则默认用CachingExecutor装饰BaseExecutor的子类
     if (cacheEnabled) {
       executor = new CachingExecutor(executor);
     }

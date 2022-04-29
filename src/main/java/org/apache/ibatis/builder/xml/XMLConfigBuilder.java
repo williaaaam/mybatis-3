@@ -134,7 +134,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     try {
       //分步骤解析
       //issue #117 read properties first
-      //1.properties
+      //1.properties 数据源配置
       propertiesElement(root.evalNode("properties"));
       //2.类型别名
       typeAliasesElement(root.evalNode("typeAliases"));

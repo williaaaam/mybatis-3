@@ -94,6 +94,11 @@ public class CacheKey implements Cloneable, Serializable {
     }
   }
 
+  /**
+   * [mappedStatementId + offset + limit + SQL + queryParams + environment] 只要这几个参数相等，那么可以认为CacheKey是相等的
+   * @param object
+   * @return
+   */
   @Override
   public boolean equals(Object object) {
     if (this == object) {

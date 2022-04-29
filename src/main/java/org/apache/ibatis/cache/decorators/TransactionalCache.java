@@ -42,9 +42,9 @@ import org.apache.ibatis.cache.Cache;
 public class TransactionalCache implements Cache {
 
   private Cache delegate;
-  //commit时要不要清缓存
+  // commit时要不要清缓存
   private boolean clearOnCommit;
-  //commit时要添加的元素
+  // commit时要添加的元素
   private Map<Object, Object> entriesToAddOnCommit;
   private Set<Object> entriesMissedInCache;
 
@@ -71,6 +71,7 @@ public class TransactionalCache implements Cache {
     // issue #116
     Object object = delegate.getObject(key);
     if (object == null) {
+      // key加入Miss集合，主要是为了统计命中率
       entriesMissedInCache.add(key);
     }
     // issue #146
@@ -98,15 +99,19 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void clear() {
+    // 设置：提交时清空缓存
     clearOnCommit = true;
+    // 清空需要在提交时加入缓存的列表
     entriesToAddOnCommit.clear();
   }
 
-  //多了commit方法，提供事务功能
+  // 多了commit方法，提供事务功能
   public void commit() {
     if (clearOnCommit) {
+      // 真正的清理Cache,具体清理职责委托给包装的Cache类
       delegate.clear();
     }
+//    在flushPendingEntries中，将待提交的Map进行循环处理，委托给包装的Cache类，进行putObject的操作
     flushPendingEntries();
     reset();
   }
@@ -122,12 +127,14 @@ public class TransactionalCache implements Cache {
     entriesMissedInCache.clear();
   }
 
+  // 在flushPendingEntries中，将待提交的Map进行循环处理，委托给包装的Cache类，进行putObject的操作
   private void flushPendingEntries() {
     for (Map.Entry<Object, Object> entry : entriesToAddOnCommit.entrySet()) {
       delegate.putObject(entry.getKey(), entry.getValue());
     }
     for (Object entry : entriesMissedInCache) {
       if (!entriesToAddOnCommit.containsKey(entry)) {
+        // 缓存空值
         delegate.putObject(entry, null);
       }
     }

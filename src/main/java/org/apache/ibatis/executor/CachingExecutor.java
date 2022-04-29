@@ -36,7 +36,7 @@ import org.apache.ibatis.transaction.Transaction;
  * @author Eduardo Macarron
  */
 /**
- * 二级缓存执行器
+ * 二级(2nd level)缓存执行器
  */
 public class CachingExecutor implements Executor {
 
@@ -81,6 +81,7 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    // 运行时会对${}值进行替换
     BoundSql boundSql = ms.getBoundSql(parameterObject);
 	//query时传入一个cachekey参数
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
@@ -91,22 +92,28 @@ public class CachingExecutor implements Executor {
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
+    // 装饰链：SynchronizedCache -> LoggingCache -> SerializedCache -> LruCache -> PerpetualCache。
     Cache cache = ms.getCache();
     //默认情况下是没有开启缓存的(二级缓存).要开启二级缓存,你需要在你的 SQL 映射文件中添加一行: <cache/>
     //简单的说，就是先查CacheKey，查不到再委托给实际的执行器去查
     if (cache != null) {
+      // update,delete,insert会刷新缓存；select不会刷新缓存
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, parameterObject, boundSql);
         @SuppressWarnings("unchecked")
+        //
         List<E> list = (List<E>) tcm.getObject(cache, key);
         if (list == null) {
+          // 委托BaseExecutor子类去查询
           list = delegate.<E> query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+          // 并不是直接操作缓存，而是添加到Map（  private Map<Object, Object> entriesToAddOnCommit;)中
           tcm.putObject(cache, key, list); // issue #578 and #116
         }
         return list;
       }
     }
+    // 委托给BaseExecutor子类
     return delegate.<E> query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -132,6 +139,7 @@ public class CachingExecutor implements Executor {
     }
   }
 
+  // 存储过程相关处理
   private void ensureNoOutParams(MappedStatement ms, Object parameter, BoundSql boundSql) {
     if (ms.getStatementType() == StatementType.CALLABLE) {
       for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {

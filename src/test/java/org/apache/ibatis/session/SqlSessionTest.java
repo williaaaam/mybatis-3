@@ -70,6 +70,7 @@ public class SqlSessionTest extends BaseDataTest {
     Configuration c = new Configuration();
     final String fullName = "com.mycache.MyCache";
     final String shortName = "MyCache";
+    // 本地永久缓存
     final PerpetualCache cache = new PerpetualCache(fullName);
     c.addCache(cache);
     assertEquals(cache, c.getCache(fullName));

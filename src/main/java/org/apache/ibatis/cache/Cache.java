@@ -42,6 +42,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 /**
  * 缓存
  *
+ * 1. SynchronizedCache：同步Cache，实现比较简单，直接使用synchronized修饰方法。
+ * 2. LoggingCache：日志功能，装饰类，用于记录缓存的命中率，如果开启了DEBUG模式，则会输出命中率日志。
+ * 3. SerializedCache：序列化功能，将值序列化后存到缓存中。该功能用于缓存返回一份实例的Copy，用于保存线程安全。
+ * 4. LruCache：采用了Lru算法的Cache实现，移除最近最少使用的Key/Value。
+ * 5. PerpetualCache： 作为为最基础的缓存类，底层实现比较简单，直接使用了HashMap。
+ *
  */
 public interface Cache {
 

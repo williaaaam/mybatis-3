@@ -29,7 +29,7 @@ import org.apache.ibatis.cache.decorators.TransactionalCache;
  */
 public class TransactionalCacheManager {
 
-  //管理了许多TransactionalCache
+  // 管理了许多TransactionalCache
   private Map<Cache, TransactionalCache> transactionalCaches = new HashMap<Cache, TransactionalCache>();
 
   public void clear(Cache cache) {
@@ -38,6 +38,7 @@ public class TransactionalCacheManager {
 
   //得到某个TransactionalCache的值
   public Object getObject(Cache cache, CacheKey key) {
+    // 包装原来的Cache
     return getTransactionalCache(cache).getObject(key);
   }
   

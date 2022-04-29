@@ -31,6 +31,11 @@ public interface SqlSessionFactory {
   //8个方法可以用来创建SqlSession实例
   SqlSession openSession();
 
+  /**
+   *
+   * @param autoCommit
+   * @return
+   */
   //自动提交
   SqlSession openSession(boolean autoCommit);
   //连接

@@ -26,7 +26,7 @@ org.apache.ibatis.cache.impl
 
 4.解析
 org.apache.ibatis.parsing
-xml解析，${} 格式的字符串解析
+xml解析，${} 格式的字符串解析，执行sql语句前进行SQL值替换
 源码分析可以参考http://www.cnblogs.com/sunzhenchao/p/3161093.html
 
 5.类型处理器

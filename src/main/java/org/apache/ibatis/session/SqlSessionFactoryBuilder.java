@@ -39,6 +39,12 @@ public class SqlSessionFactoryBuilder {
   //发现mybatis文档老了,http://www.mybatis.org/core/java-api.html,关于这块对不上
 
   //以下3个方法都是调用下面第4种方法
+
+  /**
+   * 根据配置文件mybatis-cconfig.xml 构造SqlSessionFactory
+   * @param reader
+   * @return
+   */
   public SqlSessionFactory build(Reader reader) {
     return build(reader, null, null);
   }
